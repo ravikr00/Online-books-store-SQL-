@@ -1,0 +1,71 @@
+-- Customers table
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100)
+);
+
+-- Books table
+CREATE TABLE Books (
+    book_id INT PRIMARY KEY,
+    title VARCHAR(100),
+    author VARCHAR(100),
+    price DECIMAL(6,2),
+    stock INT
+);
+
+-- Orders table
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+
+-- Order Details table (many-to-many relation between Orders and Books)
+CREATE TABLE OrderDetails (
+    order_detail_id INT PRIMARY KEY,
+    order_id INT,
+    book_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+    FOREIGN KEY (book_id) REFERENCES Books(book_id)
+);
+-- Insert customers
+INSERT INTO Customers VALUES
+(1, 'Ravi Kumar', 'ravi@example.com'),
+(2, 'Neha Sharma', 'neha@example.com');
+
+-- Insert books
+INSERT INTO Books VALUES
+(101, 'The Alchemist', 'Paulo Coelho', 299.99, 20),
+(102, 'Atomic Habits', 'James Clear', 499.00, 15),
+(103, 'Wings of Fire', 'A.P.J Abdul Kalam', 350.00, 10);
+
+-- Insert orders
+INSERT INTO Orders VALUES
+(201, 1, '2024-07-01'),
+(202, 2, '2024-07-05');
+
+-- Insert order details
+INSERT INTO OrderDetails VALUES
+(301, 201, 101, 2),
+(302, 201, 102, 1),
+(303, 202, 103, 1);
+SELECT Orders.order_id, Customers.name AS customer_name, Orders.order_date
+FROM Orders
+JOIN Customers ON Orders.customer_id = Customers.customer_id;
+SELECT o.order_id, c.name AS customer_name, b.title, od.quantity
+FROM OrderDetails od
+JOIN Orders o ON od.order_id = o.order_id
+JOIN Customers c ON o.customer_id = c.customer_id
+JOIN Books b ON od.book_id = b.book_id;
+SELECT 
+  o.order_id,
+  SUM(b.price * od.quantity) AS total_amount
+FROM Orders o
+JOIN OrderDetails od ON o.order_id = od.order_id
+JOIN Books b ON od.book_id = b.book_id
+GROUP BY o.order_id;
+SELECT * FROM Books
+WHERE stock < 12;
